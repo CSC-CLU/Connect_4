@@ -18,8 +18,9 @@
  * these functions. They are present to help eliminate code that will be common to most players.
  *
  * @author Eric Heinke
- * @version 2023-9-19 (Sep 19, 2023)
+ * @version 2023-9-29 (Sep 29, 2023)
  */
+@SuppressWarnings("unused")
 public abstract class Player {
     /** Name of the player */
     protected String name;

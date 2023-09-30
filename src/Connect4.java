@@ -7,7 +7,7 @@ import java.util.Random;
  * This class is the main game engine. It handles all game logic and controls the graphics.
  *
  * @author Eric Heinke
- * @version 2023-9-19 (Sep 19, 2023)
+ * @version 2023-9-29 (Sep 29, 2023)
  */
 public class Connect4 extends World {
     private static final int FIRST_COLUMN_X = 176; // to place checkers in the correct location
@@ -43,8 +43,8 @@ public class Connect4 extends World {
      * Constructs board and initializes players to predefined players
      *
      */
-    public Connect4() {
-        this("PlayerEricHS", "PlayerRandom");
+    public Connect4() throws ClassNotFoundException {
+        this(Class.forName("PlayerEricHS"), Class.forName("PlayerRandom"));
     }
 
     /**
@@ -52,16 +52,16 @@ public class Connect4 extends World {
      *
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public Connect4(String black, String red) {
+    public Connect4(Class<?> black, Class<?> red) {
         // Create a new world with 600x400 cells with a cell size of 1x1 pixels.
         super(600, 400, 1);
         gameBoard = new char[6][7];
         firstPlayerTurn = random.nextInt(2)+1;   //randomize who starts the game
 
         try {
-            playerBlack = (Player) Class.forName(black).getConstructor(char.class, char.class, char.class)
+            playerBlack = (Player) black.getConstructor(char.class, char.class, char.class)
                     .newInstance(BLACK_PIECE, RED_PIECE, EMPTY_SPACE);
-            playerRed = (Player) Class.forName(red).getConstructor(char.class, char.class, char.class)
+            playerRed = (Player) red.getConstructor(char.class, char.class, char.class)
                     .newInstance(RED_PIECE, BLACK_PIECE, EMPTY_SPACE);
         } catch (InvocationTargetException e) {
             throw new RuntimeException(e);
@@ -70,8 +70,6 @@ public class Connect4 extends World {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
