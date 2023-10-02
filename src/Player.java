@@ -18,7 +18,7 @@
  * these functions. They are present to help eliminate code that will be common to most players.
  *
  * @author Eric Heinke
- * @version 2023-9-29 (Sep 29, 2023)
+ * @version 2023-10-1 (Oct 1, 2023)
  */
 @SuppressWarnings("unused")
 public abstract class Player {
@@ -76,7 +76,7 @@ public abstract class Player {
      * @return Copy of the board
      */
     protected char[][] duplicateBoard(char[][] gameBoard) {
-        return Connect4.duplicateBoard(gameBoard);
+        return Tournament.duplicateBoard(gameBoard);
     }
 
     /**
@@ -102,7 +102,7 @@ public abstract class Player {
      * @return Winner's piece color or EMPTY_SPACE for no win
      */
     protected char checkForWinner(char[][] gameBoard) {
-        return Connect4.checkForWinner(gameBoard);
+        return Tournament.checkForWinner(gameBoard);
     }
 
     /**
@@ -111,7 +111,7 @@ public abstract class Player {
      * @return if there is a tie
      */
     protected boolean checkForTie(char[][] gameBoard) {
-        return Connect4.tie(gameBoard);
+        return Tournament.tie(gameBoard);
     }
 }
 
