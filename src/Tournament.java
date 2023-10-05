@@ -12,11 +12,21 @@ public class Tournament {
         Queue<Class<?>> players = new LinkedList<>();
         players.add(Class.forName("PlayerEricHS"));
         players.add(Class.forName("PlayerRandom"));
-        players.add(PlayerEricHS.class);
-        players.add(PlayerRandom.class);
-//        players.add(PlayerEricHS.class);
+        players.add(Class.forName("PlayerEricHS"));
+        players.add(Class.forName("PlayerRandom"));
+        players.add(Class.forName("PlayerEricHS"));
+        players.add(Class.forName("PlayerRandom"));
+        players.add(Class.forName("PlayerEricHS"));
+        players.add(Class.forName("PlayerRandom"));
 
+        int round = 0;
         while (players.size() > 1) { // Rounds of play
+            System.out.print("Round: " + ++round + " (");
+            if (players.size() %2 == 0) {
+                System.out.println(players.size() + " players, " + (players.size()/2) + " games)");
+            } else {
+                System.out.println(players.size() + " players, " + (players.size()/2) + " games, 1 passthrough)");
+            }
             Queue<Class<?>> temp = new LinkedList<>();
             while (players.size() > 1) { // Plays per round
                 Class<?> playerBlackClass = players.remove();
@@ -35,12 +45,13 @@ public class Tournament {
 
                 MatchResult matchResult = game.getResults();
 
-//                // If black player wins
-//                temp.add(playerBlackClass);
-//                // If red player wins
-//                temp.add(playerRedClass);
-//                // If players tie (game is indecisive)
-//                temp.add(null);
+                if (matchResult.winner() == Common.BLACK_PIECE) {
+                    temp.add(playerBlackClass);
+                } else if (matchResult.winner() == Common.RED_PIECE) {
+                    temp.add(playerRedClass);
+                } else { //@TODO improve this later
+                    temp.add(Common.randomPlayer() == Common.BLACK_PIECE ? playerBlackClass : playerRedClass);
+                }
                 System.out.println(matchResult);
             }
             if (players.size() == 1) {
@@ -114,6 +125,16 @@ class MatchResult {
         return games;
     }
 
+    //@TODO Improve this later
+    public char winner() {
+        if (blackWins > redWins) {
+            return Common.BLACK_PIECE;
+        } else if (redWins > blackWins) {
+            return Common.RED_PIECE;
+        }
+        return Common.EMPTY_SPACE;
+    }
+
     @Override
     public String toString() {
         return String.format("Game: %s vs %s, %5.2f%%, %5.2f%%, %5.2f%%", playerBlackName, playerRedName, blackWins*100.0/games, redWins*100.0/games, ties*100.0/games);
@@ -123,7 +144,6 @@ class MatchResult {
 /**
  * Play a specified number of games between two players on an independent thread.
  */
-@SuppressWarnings("unused")
 class Match extends Thread {
     private final Player playerBlack;
     private final Player playerRed;
