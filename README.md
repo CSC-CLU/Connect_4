@@ -1,4 +1,4 @@
-# Connect 4
+# Connect 4 Tournament Edition
 
 A connect 4 tournament style game for creating and competing different Connect 4 algorithms/AIs
 
@@ -6,10 +6,7 @@ A connect 4 tournament style game for creating and competing different Connect 4
 
 ### How to run the program:
 
-GreenFoot is required to run the Connect 4 program.
-In GreenFoot, of you open the folder containing the code, the program will load and be ready for use. Click Run to run a game, Pause to pause the game, Act to progress the game by one 'act' (one call to the Act function), or Reset to reset the program.
-
-To compile changes, you will need to go to Tools and Recompile Scenario
+TBD
 
 ### How to make your own player
 
