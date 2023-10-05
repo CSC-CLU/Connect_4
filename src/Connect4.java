@@ -7,7 +7,7 @@ import java.util.Random;
  * This class is the main game engine. It handles all game logic and controls the graphics.
  *
  * @author Eric Heinke
- * @version 2023-9-29 (Sep 29, 2023)
+ * @version 2023-10-4 (Oct 4, 2023)
  */
 public class Connect4 extends World {
     private static final int FIRST_COLUMN_X = 176; // to place checkers in the correct location
@@ -17,16 +17,13 @@ public class Connect4 extends World {
     private static final boolean COUNT_TIES = true; // Do ties get included in statistics
     /** Used to allow a piece to fall completely before the next piece is played. */
     private int ACT_COUNTER = 0;
-    private static final char EMPTY_SPACE = ' ';
-    private static final char BLACK_PIECE = 'b';
-    private static final char RED_PIECE = 'r';
 
     /** Connect 4 game board */
     private final char[][] gameBoard;
 
     /** Current players turn (Black = BLACK_PIECE, Red = RED_PIECE) */
-    private int playerTurn;
-    private int firstPlayerTurn;
+    private char playerTurn;
+    private char firstPlayerTurn;
 
     /** Black player */
     private final Player playerBlack;
@@ -37,7 +34,6 @@ public class Connect4 extends World {
     private int playerBlackWinTotal;
     private int playerRedWinTotal;
     private int tieCounter;
-    private static final Random random = new Random();;
 
     /**
      * Constructs board and initializes players to predefined players
@@ -56,13 +52,11 @@ public class Connect4 extends World {
         // Create a new world with 600x400 cells with a cell size of 1x1 pixels.
         super(600, 400, 1);
         gameBoard = new char[6][7];
-        firstPlayerTurn = random.nextInt(2)+1;   //randomize who starts the game
+        firstPlayerTurn = Common.randomPlayer(); //randomize who starts the game
 
         try {
-            playerBlack = (Player) black.getConstructor(char.class, char.class, char.class)
-                    .newInstance(BLACK_PIECE, RED_PIECE, EMPTY_SPACE);
-            playerRed = (Player) red.getConstructor(char.class, char.class, char.class)
-                    .newInstance(RED_PIECE, BLACK_PIECE, EMPTY_SPACE);
+            playerBlack = Common.constructPlayer(black);
+            playerRed = Common.constructPlayer(red);
         } catch (InvocationTargetException e) {
             throw new RuntimeException(e);
         } catch (InstantiationException e) {
@@ -91,7 +85,7 @@ public class Connect4 extends World {
     public void act() {
         if (ACT_COUNTER < 1) {
             char winner = checkForWinner();
-            if (winner != EMPTY_SPACE || tie()) {
+            if (winner != Common.EMPTY_SPACE || tie()) {
                 showPlayerWin(winner);
                 Greenfoot.delay(DELAY_ON_WIN); //allows the highlighted winner more time to be seen
                 newGame();
@@ -115,19 +109,15 @@ public class Connect4 extends World {
         removeObjects(getObjects(BigRing.class));
 
         // swap who plays first
-        firstPlayerTurn = firstPlayerTurn == BLACK_PIECE ? RED_PIECE : BLACK_PIECE;
+        firstPlayerTurn = Common.swapPlayer(firstPlayerTurn);
         playerTurn = firstPlayerTurn;
 
         // clear the game board
-        for(int row = 0; row < gameBoard.length; row++){
-            for(int col = 0; col < gameBoard[0].length; col++){
-                gameBoard[row][col] = EMPTY_SPACE;
-            }
-        }
+        Common.clearBoard(gameBoard);
 
         // Let players know that it is a new game
-        playerBlack.newGame(firstPlayerTurn == BLACK_PIECE);
-        playerRed.newGame(firstPlayerTurn == RED_PIECE);
+        playerBlack.newGame(firstPlayerTurn == Common.BLACK_PIECE);
+        playerRed.newGame(firstPlayerTurn == Common.RED_PIECE);
     }
 
     /**
@@ -138,21 +128,21 @@ public class Connect4 extends World {
         GreenfootImage image;
         int column = -1;
         char color = (char)playerTurn;
-        if (playerTurn == BLACK_PIECE) {
-            playerTurn = RED_PIECE;
+        if (playerTurn == Common.BLACK_PIECE) {
+            playerTurn = Common.RED_PIECE;
             image = new GreenfootImage("black.png"); //sets image to black checker
             try {
                 column = playerBlack.play(duplicateBoard()); // Get player's move
             } catch (Exception ignored) {} // Exceptions are treated as a forfeited turn
         } else {
-            playerTurn = BLACK_PIECE;
+            playerTurn = Common.BLACK_PIECE;
             image = new GreenfootImage("red.png");  //sets image to red checker
             try {
                 column = playerRed.play(duplicateBoard()); // Get player's move
             } catch (Exception ignored) {} // Exceptions are treated as a forfeited turn
         }
-        column = dropPiece(column, color);
-        addObject(new Checker(column, image, gameBoard, EMPTY_SPACE),
+        column = Common.dropPiece(gameBoard, column, color);
+        addObject(new Checker(column, image, gameBoard, Common.EMPTY_SPACE),
                 FIRST_COLUMN_X + (column * SPACE_BETWEEN_COLUMNS), FIRST_COLUMN_Y);
     }
 
@@ -161,60 +151,7 @@ public class Connect4 extends World {
      * @return Duplicate game board
      */
     private char[][] duplicateBoard() {
-        return duplicateBoard(this.gameBoard);
-    }
-
-    public static char[][] duplicateBoard(char[][] matrix) {
-        return java.util.Arrays.stream(matrix).map(char[]::clone).toArray($ -> matrix.clone());
-    }
-
-    /**
-     * Drop piece onto the game board
-     * @param column Column to place the piece
-     * @param color Color of the piece being placed
-     * @return Column the piece was dropped in
-     */
-    private int dropPiece(int column, char color) {
-        // If column is invalid or is already full, determine new column
-        if (column < 0 || column > gameBoard[0].length || gameBoard[0][column] != EMPTY_SPACE) {
-            for (int i = 0; i < 10; i++) {
-                column = random.nextInt(7);
-                if (gameBoard[0][column] == EMPTY_SPACE) {
-                    break;
-                }
-            }
-        }
-        // If random placement fails, use the first available column
-        if (gameBoard[0][column] != EMPTY_SPACE) {
-            for (int i = 0; i < gameBoard[0].length; i++) {
-                if (gameBoard[0][column] == EMPTY_SPACE) {
-                    column = i;
-                    break;
-                }
-            }
-        }
-
-        gameBoard[0][column] = color;
-
-        //drops new piece down the column to bottom
-        ACT_COUNTER = 2;
-        for(int col = 0; col < gameBoard[0].length; col++)
-        {
-            for(int row = 0; row < gameBoard.length - 1; row++)
-            {
-                if(gameBoard[row][col] != EMPTY_SPACE && gameBoard[row + 1][col] == EMPTY_SPACE)
-                {
-                    gameBoard[row+1][col] = gameBoard[row][col];
-                    gameBoard[row][col] = EMPTY_SPACE;
-                    ACT_COUNTER++;
-                }
-                else if(gameBoard[row][col] != EMPTY_SPACE && gameBoard[row + 1][col] != EMPTY_SPACE)
-                {
-                    break;
-                }
-            }
-        }
-        return column;
+        return Common.duplicateBoard(this.gameBoard);
     }
 
     /**
@@ -222,69 +159,7 @@ public class Connect4 extends World {
      * @return Winner's piece color or EMPTY_SPACE for no win
      */
     private char checkForWinner() {
-        return checkForWinner(this.gameBoard);
-    }
-
-    /**
-     * Check to see if there is a winner.
-     * @param gameBoard Game board to check
-     * @return Winner's piece color or EMPTY_SPACE for no win
-     */
-    public static char checkForWinner(char[][] gameBoard) {
-        // check each row for a winner, starting at bottom
-        for (int row = gameBoard.length - 1; row >= 0; row--) {
-            char winner = gameBoard[row][3];
-            if (winner == EMPTY_SPACE) {
-                continue;
-            }
-            for (int col = 0; col < 4; col++) {
-                if (gameBoard[row][col] == winner && gameBoard[row][col+1] == winner &&
-                        gameBoard[row][col+2] == winner && gameBoard[row][col+3] == winner) {
-                    return winner;
-                }
-            }
-        }
-
-        // check each column for a winner
-        for (int col = 0; col < gameBoard[0].length; col++) {
-            char winner = gameBoard[2][col];
-            if (winner == EMPTY_SPACE) {
-                continue;
-            }
-            for (int row = 2; row >=0; row--) {
-                if (gameBoard[row][col] == winner && gameBoard[row+1][col] == winner &&
-                        gameBoard[row+2][col] == winner && gameBoard[row+3][col] == winner) {
-                    return winner;
-                }
-            }
-        }
-
-        // check for diagonal winner
-        for (int row = 2; row >= 0; row--) {
-            for (int col = 0; col < 4; col++) {
-                char winner = gameBoard[row][col];
-                if (winner == EMPTY_SPACE) {
-                    continue;
-                }
-                if (gameBoard[row+1][col+1] == winner && gameBoard[row+2][col+2] == winner && gameBoard[row+3][col+3] == winner) {
-                    return winner;
-                }
-            }
-        }
-        for (int row = 2; row >= 0; row--) {
-            for (int col = gameBoard[0].length - 1; col >= gameBoard[0].length - 4; col--) {
-                char winner = gameBoard[row][col];
-                if (winner == EMPTY_SPACE) {
-                    continue;
-                }
-                if (gameBoard[row+1][col-1] == winner && gameBoard[row+2][col-2] == winner && gameBoard[row+3][col-3] == winner) {
-                    return winner;
-                }
-            }
-        }
-
-        // No winner found
-        return EMPTY_SPACE;
+        return Common.checkForWinner(this.gameBoard);
     }
 
     /**
@@ -292,24 +167,7 @@ public class Connect4 extends World {
      * @return if there is a tie
      */
     private boolean tie() {
-        return tie(this.gameBoard);
-    }
-
-    /**
-     * Check if there is a tie
-     * @param gameBoard Game board to check
-     * @return if there is a tie
-     */
-    public static boolean tie(char[][] gameBoard) {
-        //if there is an empty space on the top row of the board, there is not a tie
-        for(int i = 0; i< gameBoard[0].length; i++)
-        {
-            if(gameBoard[0][i] == EMPTY_SPACE)
-            {
-                return false;
-            }
-        }
-        return true;
+        return Common.tie(this.gameBoard);
     }
 
     /**
@@ -317,10 +175,10 @@ public class Connect4 extends World {
      * @param player Player that won
      */
     public void showPlayerWin(char player) {
-        if (player == BLACK_PIECE) {
+        if (player == Common.BLACK_PIECE) {
             playerBlackWinTotal++;
             addObject(new BigRing(),70,130); //highlights black name
-        } else if (player == RED_PIECE) {
+        } else if (player == Common.RED_PIECE) {
             playerRedWinTotal++;
             addObject(new BigRing(),getWidth()-70,130); //highlights black name
         } else {
@@ -352,7 +210,7 @@ public class Connect4 extends World {
         // check each row for a winner, starting at bottom
         for (int row = gameBoard.length - 1; row >= 0; row--) {
             char winner = gameBoard[row][3];
-            if (winner == EMPTY_SPACE) {
+            if (winner == Common.EMPTY_SPACE) {
                 continue;
             }
             for (int col = 0; col < 4; col++) {
@@ -369,7 +227,7 @@ public class Connect4 extends World {
         // check each column for a winner
         for (int col = 0; col < gameBoard[0].length; col++) {
             char winner = gameBoard[2][col];
-            if (winner == EMPTY_SPACE) {
+            if (winner == Common.EMPTY_SPACE) {
                 continue;
             }
             for (int row = 2; row >=0; row--) {
@@ -387,7 +245,7 @@ public class Connect4 extends World {
         for (int row = 2; row >= 0; row--) {
             for (int col = 0; col < 4; col++) {
                 char winner = gameBoard[row][col];
-                if (winner == EMPTY_SPACE) {
+                if (winner == Common.EMPTY_SPACE) {
                     continue;
                 }
                 if (gameBoard[row+1][col+1] == winner && gameBoard[row+2][col+2] == winner && gameBoard[row+3][col+3] == winner) {
@@ -401,7 +259,7 @@ public class Connect4 extends World {
         for (int row = 2; row >= 0; row--) {
             for (int col = gameBoard[0].length - 1; col >= gameBoard[0].length - 4; col--) {
                 char winner = gameBoard[row][col];
-                if (winner == EMPTY_SPACE) {
+                if (winner == Common.EMPTY_SPACE) {
                     continue;
                 }
                 if (gameBoard[row+1][col-1] == winner && gameBoard[row+2][col-2] == winner && gameBoard[row+3][col-3] == winner) {
