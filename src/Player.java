@@ -76,7 +76,7 @@ public abstract class Player {
      * @return Copy of the board
      */
     protected char[][] duplicateBoard(char[][] gameBoard) {
-        return Tournament.duplicateBoard(gameBoard);
+        return Common.duplicateBoard(gameBoard);
     }
 
     /**
@@ -102,7 +102,7 @@ public abstract class Player {
      * @return Winner's piece color or EMPTY_SPACE for no win
      */
     protected char checkForWinner(char[][] gameBoard) {
-        return Tournament.checkForWinner(gameBoard);
+        return Common.checkForWinner(gameBoard);
     }
 
     /**
@@ -111,7 +111,7 @@ public abstract class Player {
      * @return if there is a tie
      */
     protected boolean checkForTie(char[][] gameBoard) {
-        return Tournament.tie(gameBoard);
+        return Common.tie(gameBoard);
     }
 }
 
