@@ -2,6 +2,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Random;
 
+/**
+ * Common code for Connect 4 games
+ * @author Eric Heinke
+ * @version 2023-10-4 (Oct 4, 2023)
+ */
 public class Common {
     public static final char EMPTY_SPACE = ' ';
     public static final char BLACK_PIECE = 'b';
