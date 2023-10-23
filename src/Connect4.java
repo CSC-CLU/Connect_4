@@ -7,7 +7,7 @@ import java.util.Random;
  * This class is the main game engine. It handles all game logic and controls the graphics.
  *
  * @author Eric Heinke
- * @version 2023-10-4 (Oct 4, 2023)
+ * @version 2023-10-22 (Oct 22, 2023)
  */
 public class Connect4 extends World {
     private static final int FIRST_COLUMN_X = 176; // to place checkers in the correct location
@@ -40,7 +40,7 @@ public class Connect4 extends World {
      *
      */
     public Connect4() throws ClassNotFoundException {
-        this(Class.forName("PlayerEricHS"), Class.forName("PlayerRandom"));
+        this(Class.forName("PlayerRandom"), Class.forName("PlayerRandom"));
     }
 
     /**
@@ -127,7 +127,7 @@ public class Connect4 extends World {
     private void play() {
         GreenfootImage image;
         int column = -1;
-        char color = (char)playerTurn;
+        char color = playerTurn;
         if (playerTurn == Common.BLACK_PIECE) {
             playerTurn = Common.RED_PIECE;
             image = new GreenfootImage("black.png"); //sets image to black checker
@@ -142,6 +142,14 @@ public class Connect4 extends World {
             } catch (Exception ignored) {} // Exceptions are treated as a forfeited turn
         }
         column = Common.dropPiece(gameBoard, column, color);
+        // Set act counter so piece (visual) has time to fall
+        ACT_COUNTER = 2;
+        for (int i = 0; i < gameBoard.length; i++) {
+            ACT_COUNTER++;
+            if (gameBoard[i][column] != Common.EMPTY_SPACE) {
+                break;
+            }
+        }
         addObject(new Checker(column, image, gameBoard, Common.EMPTY_SPACE),
                 FIRST_COLUMN_X + (column * SPACE_BETWEEN_COLUMNS), FIRST_COLUMN_Y);
     }
