@@ -40,7 +40,7 @@ public class Connect4 extends World {
      *
      */
     public Connect4() throws ClassNotFoundException {
-        this(Class.forName("PlayerRandom"), Class.forName("PlayerRandom"));
+        this(Class.forName("PlayerEric"), Class.forName("PlayerEricHS"));
     }
 
     /**
